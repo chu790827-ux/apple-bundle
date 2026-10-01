@@ -66,8 +66,38 @@ function startQuiz(){home.style.display="none";quiz.style.display="block";render
 function render(){num.textContent=i+1;question.textContent=qs[i].q;options.innerHTML="";feedback.innerHTML="";
  if(qs[i].img){let note=document.createElement("div");note.className="refnote";note.textContent="📌 請參考下方 Perdipine 初始／後續調整表作答";options.appendChild(note);let im=document.createElement("img");im.className="refimg";im.src=qs[i].img;im.alt="Perdipine 初始與後續劑量調整表";options.appendChild(im);}
  qs[i].o.forEach((x,j)=>{let b=document.createElement("button");b.className="option";b.textContent=x;b.onclick=()=>answer(j,b);options.appendChild(b)})}
-function answer(j,b){[...options.children].forEach(x=>x.disabled=true);if(j===qs[i].a){score++;b.classList.add("correct")}else{b.classList.add("wrong");options.children[qs[i].a].classList.add("correct")}
- feedback.className="feedback";feedback.innerHTML=qs[i].f+'<button onclick="next()">下一題</button>'}
+function answer(j,b){
+ const btns=[...options.querySelectorAll("button.option")];
+ btns.forEach(x=>x.disabled=true);
+ if(j===qs[i].a){score++;b.classList.add("correct")}
+ else{b.classList.add("wrong");btns[qs[i].a].classList.add("correct")}
+ feedback.className="feedback";
+ const label=(i===qs.length-1)?"查看成績":"下一題";
+ feedback.innerHTML=qs[i].f+'<button onclick="next()">'+label+'</button>';
+}
 function next(){i++;if(i>=qs.length)finish();else render()}
-function finish(){clearInterval(timer);quiz.style.display="none";result.style.display="block";document.getElementById("score").textContent=score}
+function finish(){
+ clearInterval(timer);
+ const elapsed=Math.min(90,Math.max(0,90-left));
+ const pct=Math.round((score/qs.length)*1000)/10;
+ let badge="",msg="";
+ if(score===qs.length){badge="🏆 APPLE Bundle 金牌達人";msg="滿分通關！APPLE Bundle 重點掌握完整。";}
+ else if(pct>=87.5){badge="🥇 APPLE Bundle 優秀達人";msg="表現優秀，再複習錯題即可更完整。";}
+ else if(pct>=75){badge="🍎 APPLE Bundle 達標";msg="已達標，建議再確認錯題與臨床流程。";}
+ else {badge="📚 APPLE Bundle 再複習";msg="建議重新複習 APPLE Bundle 後再次挑戰。";}
+ document.getElementById("quiz").style.display="none";
+ const result=document.getElementById("result");
+ result.style.display="block";
+ result.innerHTML=`<div class="card" style="text-align:center">
+   <div style="font-size:52px;margin:4px 0 8px">${score===qs.length?"🏆":"🍎"}</div>
+   <h2>90秒挑戰完成！</h2>
+   <div style="font-size:46px;font-weight:900;margin:16px 0">${pct} 分</div>
+   <div style="font-size:20px;font-weight:800;margin-bottom:10px">${badge}</div>
+   <p>答對 <b>${score} / ${qs.length}</b> 題</p>
+   <p>⏱ 完成時間：<b>${elapsed} 秒</b></p>
+   <p style="margin-top:12px">${msg}</p>
+   <button class="primary" onclick="location.reload()">再挑戰一次</button>
+ </div>`;
+ window.scrollTo(0,0);
+}
 </script></body></html>
